@@ -313,4 +313,47 @@ export class AdminService {
       limit: take,
     };
   }
+
+  // ─── Common Areas CRUD ──────────────────────────────────────────────────
+
+  async listCommonAreas() {
+    const areas = await this.prisma.commonArea.findMany({ orderBy: { name: 'asc' } });
+    return { areas };
+  }
+
+  async createCommonArea(data: { name: string; description?: string; capacity?: number; rules?: string }) {
+    const area = await this.prisma.commonArea.create({
+      data: {
+        id: require('uuid').v4(),
+        name: data.name,
+        description: data.description || null,
+        capacity: data.capacity || 20,
+        rules: data.rules || null,
+      },
+    });
+    return area;
+  }
+
+  async updateCommonArea(id: string, data: { name?: string; description?: string; capacity?: number; rules?: string; is_active?: boolean }) {
+    const existing = await this.prisma.commonArea.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Área não encontrada.');
+
+    return this.prisma.commonArea.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.capacity !== undefined && { capacity: data.capacity }),
+        ...(data.rules !== undefined && { rules: data.rules }),
+        ...(data.is_active !== undefined && { is_active: data.is_active }),
+      },
+    });
+  }
+
+  async deleteCommonArea(id: string) {
+    const existing = await this.prisma.commonArea.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Área não encontrada.');
+    await this.prisma.commonArea.delete({ where: { id } });
+    return { deleted: true };
+  }
 }
