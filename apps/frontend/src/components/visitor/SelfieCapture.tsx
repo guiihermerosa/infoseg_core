@@ -32,6 +32,8 @@ export function SelfieCapture({ onCapture, onClear, hasPhoto }: SelfieCapturePro
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        // Ensure video plays on mobile browsers
+        await videoRef.current.play().catch(() => {});
       }
       setCameraAvailable(true);
       setCameraError(null);
