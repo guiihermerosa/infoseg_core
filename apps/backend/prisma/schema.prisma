@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Resident {
+  id               String   @id @default(uuid())
+  name             String   @db.NVarChar(150)
+  apartment_number String   @db.NVarChar(10)
+  block            String   @db.NVarChar(20)
+  phone            String   @db.NVarChar(20)
+  email            String   @unique @db.NVarChar(255)
+  password_hash    String   @db.NVarChar(255)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  visits Visit[]
+  reservations Reservation[]
+
+  @@index([email])
+  @@index([apartment_number, block])
+}
+
+model Visitor {
+  id                 String   @id @default(uuid())
+  name               String   @db.NVarChar(150)
+  document           String   @db.NVarChar(30)
+  face_encoding_url  String?  @db.NVarChar(500)
+  created_at         DateTime @default(now())
+
+  visits Visit[]
+
+  @@index([document])
+}
+
+model Visit {
+  id                String   @id @default(uuid())
+  resident_id       String
+  visitor_id        String?
+  status            String   @default("pending") @db.NVarChar(20)
+  visit_date        DateTime?
+  valid_until       DateTime
+  invite_link_token String   @unique @db.NVarChar(255)
+  visitor_name      String   @db.NVarChar(150)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  resident Resident @relation(fields: [resident_id], references: [id])
+  visitor  Visitor? @relation(fields: [visitor_id], references: [id])
+
+  @@index([resident_id])
+  @@index([invite_link_token])
+  @@index([status, valid_until])
+}
+
+model AccessLog {
+  id           String   @id @default(uuid())
+  user_id      String
+  user_type    String   @db.NVarChar(20)
+  action_type  String   @db.NVarChar(50)
+  access_point String   @db.NVarChar(100)
+  details      String?  @db.NVarChar(500)
+  timestamp    DateTime @default(now())
+
+  @@index([timestamp])
+  @@index([user_type, user_id])
+}
+
+model Camera {
+  id              String   @id @default(uuid())
+  name            String   @db.NVarChar(100)
+  ip_address      String   @db.NVarChar(45)
+  onvif_port      Int
+  rtsp_port       Int
+  rtsp_url        String?  @db.NVarChar(500)
+  connection_type String   @default("onvif") @db.NVarChar(20)
+  username        String   @db.NVarChar(500)
+  password        String   @db.NVarChar(500)
+  ptz_supported   Boolean  @default(false)
+  location_zone   String   @db.NVarChar(100)
+  is_online       Boolean  @default(false)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@unique([ip_address, onvif_port])
+  @@index([ip_address])
+}
+
+model AccessPoint {
+  id              String   @id @default(uuid())
+  name            String   @db.NVarChar(100)
+  description     String?  @db.NVarChar(255)
+  protocol        String   @db.NVarChar(30)
+  ip_address      String   @db.NVarChar(45)
+  port            Int
+  endpoint_path   String?  @db.NVarChar(500)
+  username        String?  @db.NVarChar(500)
+  password        String?  @db.NVarChar(500)
+  relay_channel   Int      @default(1)
+  pulse_duration  Int      @default(1000)
+  is_online       Boolean  @default(false)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@index([name])
+}
+
+model Concierge {
+  id            String   @id @default(uuid())
+  name          String   @db.NVarChar(150)
+  email         String   @unique @db.NVarChar(255)
+  phone         String   @db.NVarChar(20)
+  password_hash String   @db.NVarChar(255)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@index([email])
+}
+
+model CommonArea {
+  id          String   @id @default(uuid())
+  name        String   @db.NVarChar(100)
+  description String?  @db.NVarChar(255)
+  capacity    Int      @default(20)
+  rules       String?  @db.NVarChar(1000)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+
+  reservations Reservation[]
+
+  @@index([name])
+}
+
+model Reservation {
+  id              String   @id @default(uuid())
+  common_area_id  String
+  resident_id     String
+  date            DateTime
+  start_time      String   @db.NVarChar(5)
+  end_time        String   @db.NVarChar(5)
+  status          String   @default("confirmed") @db.NVarChar(20)
+  notes           String?  @db.NVarChar(255)
+  created_at      DateTime @default(now())
+
+  common_area CommonArea @relation(fields: [common_area_id], references: [id])
+  resident    Resident   @relation(fields: [resident_id], references: [id])
+
+  @@index([common_area_id, date])
+  @@index([resident_id])
+}

@@ -1,0 +1,37 @@
+{
+  "name": "@infoseg/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tipos, DTOs, enums e constantes compartilhados entre apps do INFOSEG CORE",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./enums": {
+      "types": "./dist/enums/index.d.ts",
+      "default": "./dist/enums/index.js"
+    },
+    "./dto": {
+      "types": "./dist/dto/index.d.ts",
+      "default": "./dist/dto/index.js"
+    },
+    "./events": {
+      "types": "./dist/events/index.d.ts",
+      "default": "./dist/events/index.js"
+    },
+    "./constants": {
+      "types": "./dist/constants/index.d.ts",
+      "default": "./dist/constants/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "lint": "eslint src --ext .ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}

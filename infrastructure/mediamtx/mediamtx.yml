@@ -1,0 +1,26 @@
+# MediaMTX configuration for INFOSEG CORE
+# Converts RTSP camera streams to WebRTC (WHEP) and fMP4
+logLevel: info
+logDestinations: [stdout]
+
+# RTSP server
+rtsp: yes
+rtspAddress: :8554
+protocols: [tcp, udp]
+
+# WebRTC server (WHEP for viewing)
+webrtc: yes
+webrtcAddress: :8889
+webrtcEncryption: yes
+webrtcLocalUDPAddress: :8189
+webrtcIPsFromInterfaces: yes
+
+# HLS/fMP4 fallback
+hls: yes
+hlsAddress: :8888
+
+# Dynamic paths for cameras
+paths:
+  cam-~^[0-9a-f\-]+$:
+    sourceOnDemand: yes
+    sourceOnDemandCloseAfter: 30s

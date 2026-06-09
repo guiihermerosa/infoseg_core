@@ -1,0 +1,55 @@
+{
+  "name": "@infoseg/backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "INFOSEG CORE Backend — NestJS API",
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix",
+    "test": "jest",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.3.0",
+    "@nestjs/core": "^10.3.0",
+    "@nestjs/jwt": "^10.2.0",
+    "@nestjs/passport": "^10.0.3",
+    "@nestjs/platform-express": "^10.3.0",
+    "@nestjs/platform-socket.io": "^10.3.0",
+    "@nestjs/websockets": "^10.3.0",
+    "@prisma/client": "^5.10.0",
+    "bcrypt": "^5.1.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "node-onvif": "^0.1.7",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "reflect-metadata": "^0.2.1",
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.7.4",
+    "uuid": "^9.0.0"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.3.0",
+    "@nestjs/testing": "^10.3.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^20.11.0",
+    "@types/passport-jwt": "^4.0.1",
+    "@types/uuid": "^9.0.7",
+    "prisma": "^5.10.0",
+    "ts-loader": "^9.6.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths-webpack-plugin": "^4.2.0",
+    "typescript": "^5.7.0",
+    "webpack": "^5.97.1",
+    "webpack-node-externals": "^3.0.0"
+  }
+}

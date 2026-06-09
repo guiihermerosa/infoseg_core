@@ -1,0 +1,13 @@
+import { Module } from '@nestjs/common';
+import { PrismaModule } from '../prisma/prisma.module';
+import { EventsModule } from '../events/events.module';
+import { ResidentController } from './resident.controller';
+import { ResidentService } from './resident.service';
+
+@Module({
+  imports: [PrismaModule, EventsModule],
+  controllers: [ResidentController],
+  providers: [ResidentService],
+  exports: [ResidentService],
+})
+export class ResidentModule {}
