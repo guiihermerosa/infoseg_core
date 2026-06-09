@@ -42,7 +42,9 @@ export default function VisitorPage() {
     const fetchInvite = async () => {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${API_URL}/visitor/invite/${token}`);
+        const response = await fetch(`${API_URL}/visitor/invite/${token}`, {
+          headers: { 'Accept': 'application/json' },
+        });
 
         if (response.status === 410) {
           setState({ status: 'expired' });
