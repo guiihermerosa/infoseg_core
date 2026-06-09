@@ -38,9 +38,9 @@ export function isAuthenticated(): boolean {
   return !isTokenExpired(token);
 }
 
-export function getUserRole(): 'resident' | 'concierge' | null {
+export function getUserRole(): 'resident' | 'concierge' | 'support' | null {
   const token = getToken();
   if (!token) return null;
   const payload = getTokenPayload(token);
-  return payload?.role as 'resident' | 'concierge' | null;
+  return payload?.role as 'resident' | 'concierge' | 'support' | null;
 }
