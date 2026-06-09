@@ -115,10 +115,7 @@ export default function LoginPage() {
           )}
         </form>
 
-        <div className="mt-6 pt-5 border-t space-y-3 text-center">
-          <a href="/register" className="text-sm text-primary hover:text-primary/80 font-medium block transition-colors">
-            Cadastrar novo porteiro →
-          </a>
+        <div className="mt-6 pt-5 border-t text-center">
           <a href="/support" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
             Acesso técnico / suporte
           </a>
