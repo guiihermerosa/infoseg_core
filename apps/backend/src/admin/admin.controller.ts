@@ -123,4 +123,26 @@ export class AdminController {
   async triggerAccessPoint(@Param('id') id: string) {
     return this.accessPointService.trigger(id);
   }
+
+  // ─── Common Areas (Reservable Spaces) ──────────────────────────────────
+
+  @Get('common-areas')
+  async listCommonAreas() {
+    return this.adminService.listCommonAreas();
+  }
+
+  @Post('common-areas')
+  async createCommonArea(@Body() body: { name: string; description?: string; capacity?: number; rules?: string }) {
+    return this.adminService.createCommonArea(body);
+  }
+
+  @Put('common-areas/:id')
+  async updateCommonArea(@Param('id') id: string, @Body() body: { name?: string; description?: string; capacity?: number; rules?: string; is_active?: boolean }) {
+    return this.adminService.updateCommonArea(id, body);
+  }
+
+  @Delete('common-areas/:id')
+  async deleteCommonArea(@Param('id') id: string) {
+    return this.adminService.deleteCommonArea(id);
+  }
 }
