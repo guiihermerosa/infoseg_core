@@ -2,14 +2,15 @@
 
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Camera, Wrench, Users, ScrollText, DoorOpen } from 'lucide-react';
+import { Camera, Wrench, Users, ScrollText, DoorOpen, MapPin } from 'lucide-react';
 import { CameraSettings } from '@/components/admin/CameraSettings';
 import { SystemSettings } from '@/components/admin/SystemSettings';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { SystemLogs } from '@/components/admin/SystemLogs';
 import { AccessPointSettings } from '@/components/admin/AccessPointSettings';
+import { CommonAreaSettings } from '@/components/admin/CommonAreaSettings';
 
-type SettingsTab = 'users' | 'cameras' | 'access-points' | 'logs' | 'system';
+type SettingsTab = 'users' | 'cameras' | 'access-points' | 'common-areas' | 'logs' | 'system';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('users');
@@ -61,6 +62,18 @@ export default function SettingsPage() {
             Portas / Relés
           </button>
           <button
+            onClick={() => setActiveTab('common-areas')}
+            className={cn(
+              'flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
+              activeTab === 'common-areas'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <MapPin className="h-4 w-4" />
+            Reservas
+          </button>
+          <button
             onClick={() => setActiveTab('logs')}
             className={cn(
               'flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
@@ -90,6 +103,7 @@ export default function SettingsPage() {
         {activeTab === 'users' && <UserManagement />}
         {activeTab === 'cameras' && <CameraSettings />}
         {activeTab === 'access-points' && <AccessPointSettings />}
+        {activeTab === 'common-areas' && <CommonAreaSettings />}
         {activeTab === 'logs' && <SystemLogs />}
         {activeTab === 'system' && <SystemSettings />}
       </div>
