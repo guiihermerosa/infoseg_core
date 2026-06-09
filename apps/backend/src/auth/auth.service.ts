@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RateLimiterService } from './rate-limiter.service';
+import { MailService } from './mail.service';
 
 interface UserWithRole {
   id: string;
@@ -12,6 +13,13 @@ interface UserWithRole {
   role: 'resident' | 'concierge' | 'support';
 }
 
+interface ResetCodeEntry {
+  code: string;
+  email: string;
+  expiresAt: number;
+  used: boolean;
+}
+
 /** Rate limit configuration */
 const RATE_LIMIT_EMAIL_MAX = 5;
 const RATE_LIMIT_IP_MAX = 10;
@@ -19,15 +27,18 @@ const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
 /** Support/maintenance account (configured via env) */
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'suporte@infoseg.com';
-const SUPPORT_PASSWORD = process.env.SUPPORT_PASSWORD || 'infoseg@suporte2024';
+const SUPPORT_PASSWORD = process.env.SUPPORT_PASSWORD || 'Info2319@';
 const SUPPORT_NAME = 'Suporte Técnico';
 
 @Injectable()
 export class AuthService {
+  private resetCodes = new Map<string, ResetCodeEntry>();
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly rateLimiter: RateLimiterService,
+    private readonly mailService: MailService,
   ) {}
 
   async validateUser(
@@ -205,5 +216,72 @@ export class AuthService {
     }
 
     return null;
+  }
+
+  // ─── Password Reset with Email Code ─────────────────────────────────────
+
+  async requestResetCode(email: string): Promise<{ message: string }> {
+    // Always return same message (don't reveal if email exists)
+    const genericMessage = 'Se o e-mail estiver cadastrado, você receberá um código de recuperação.';
+
+    const user = await this.findByEmail(email);
+    if (!user || user.role === 'support') {
+      return { message: genericMessage };
+    }
+
+    // Generate 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    // Store code
+    this.resetCodes.set(email, { code, email, expiresAt, used: false });
+
+    // Send email
+    await this.mailService.sendResetCode(email, code);
+
+    return { message: genericMessage };
+  }
+
+  async verifyResetCode(email: string, code: string): Promise<{ valid: boolean }> {
+    const entry = this.resetCodes.get(email);
+
+    if (!entry) return { valid: false };
+    if (entry.used) return { valid: false };
+    if (Date.now() > entry.expiresAt) return { valid: false };
+    if (entry.code !== code) return { valid: false };
+
+    return { valid: true };
+  }
+
+  async resetPasswordWithCode(email: string, code: string, newPassword: string): Promise<{ message: string }> {
+    const entry = this.resetCodes.get(email);
+
+    if (!entry || entry.used || Date.now() > entry.expiresAt || entry.code !== code) {
+      throw new HttpException('Código inválido ou expirado.', HttpStatus.BAD_REQUEST);
+    }
+
+    // Mark as used
+    entry.used = true;
+
+    // Hash new password
+    const password_hash = await bcrypt.hash(newPassword, 12);
+
+    // Update in Residents
+    const resident = await this.prisma.resident.findUnique({ where: { email } });
+    if (resident) {
+      await this.prisma.resident.update({ where: { email }, data: { password_hash } });
+      this.resetCodes.delete(email);
+      return { message: 'Senha redefinida com sucesso.' };
+    }
+
+    // Update in Concierges
+    const concierge = await this.prisma.concierge.findUnique({ where: { email } });
+    if (concierge) {
+      await this.prisma.concierge.update({ where: { email }, data: { password_hash } });
+      this.resetCodes.delete(email);
+      return { message: 'Senha redefinida com sucesso.' };
+    }
+
+    throw new HttpException('Usuário não encontrado.', HttpStatus.NOT_FOUND);
   }
 }

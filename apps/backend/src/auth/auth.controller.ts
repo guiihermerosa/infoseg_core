@@ -30,8 +30,6 @@ export class AuthController {
 
   /**
    * POST /auth/register-concierge
-   * Public endpoint for registering a new concierge (porteiro).
-   * In production, this could require an invite code or approval flow.
    */
   @Post('register-concierge')
   async registerConcierge(
@@ -39,6 +37,33 @@ export class AuthController {
   ): Promise<{ id: string; name: string; email: string; message: string }> {
     const result = await this.authService.registerConcierge(dto);
     return { ...result, message: 'Porteiro cadastrado com sucesso. Faça login para acessar.' };
+  }
+
+  /**
+   * POST /auth/forgot-password
+   * Sends a 6-digit code to the email.
+   */
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: { email: string }) {
+    return this.authService.requestResetCode(body.email);
+  }
+
+  /**
+   * POST /auth/verify-code
+   * Verifies the 6-digit code.
+   */
+  @Post('verify-code')
+  async verifyCode(@Body() body: { email: string; code: string }) {
+    return this.authService.verifyResetCode(body.email, body.code);
+  }
+
+  /**
+   * POST /auth/reset-password
+   * Resets password using the verified code.
+   */
+  @Post('reset-password')
+  async resetPassword(@Body() body: { email: string; code: string; new_password: string }) {
+    return this.authService.resetPasswordWithCode(body.email, body.code, body.new_password);
   }
 
   /**
